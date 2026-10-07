@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNS運用完全ガイド 学習＆実践進捗トラッカー</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans JP -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .tab-active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            font-weight: 700;
+        }
+        /* Custom scrollbar for better readability */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div id="app" class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex items-center justify-center w-10 h-10 shadow-sm">
+                            SNS
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-900 leading-tight">SNS運用完全ガイド</h1>
+                            <p class="text-xs text-slate-500 hidden sm:block">学習と実践の進捗記録アプリ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <button @click="openBackupModal = true" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center space-x-1">
+                            <i class="fa-solid fa-database"></i>
+                            <span class="hidden sm:inline">保存・データ管理</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Navigation Tabs -->
+            <nav class="bg-slate-50 border-t border-slate-200 overflow-x-auto">
+                <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-4 whitespace-nowrap">
+                    <button @click="currentTab = 'home'" :class="['py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5', currentTab === 'home' ? 'tab-active' : 'text-slate-600 hover:text-slate-900']">
+                        <i class="fa-solid fa-house"></i>
+                        <span>① ホーム</span>
+                    </button>
+                    <button @click="currentTab = 'chapters'" :class="['py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5', currentTab === 'chapters' ? 'tab-active' : 'text-slate-600 hover:text-slate-900']">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>② 章ごとの学習</span>
+                    </button>
+                    <button @click="currentTab = 'worksheet'" :class="['py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5', currentTab === 'worksheet' ? 'tab-active' : 'text-slate-600 hover:text-slate-900']">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>③ ワーク記入状況</span>
+                    </button>
+                    <button @click="currentTab = 'roadmap'" :class="['py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5', currentTab === 'roadmap' ? 'tab-active' : 'text-slate-600 hover:text-slate-900']">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>④ 30日ロードマップ</span>
+                    </button>
+                    <button @click="currentTab = 'review'" :class="['py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1.5', currentTab === 'review' ? 'tab-active' : 'text-slate-600 hover:text-slate-900']">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>⑤ 振り返り・最終確認</span>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Notification Toast -->
+        <div v-if="toastMessage" class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-lg text-sm flex items-center space-x-2 animate-bounce">
+            <i class="fa-solid fa-circle-check text-green-400"></i>
+            <span>{{ toastMessage }}</span>
+        </div>
+
+        <!-- Main Content Body -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+            
+            <!-- TAB ① ホーム -->
+            <div v-if="currentTab === 'home'" class="space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 text-white shadow-md">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-2">SNS運用完全ガイド 進捗ダッシュボード</h2>
+                    <p class="text-blue-100 text-xs sm:text-sm leading-relaxed max-w-3xl">
+                        資料を読み、別冊ワークシートに回答しながら、学習と実践の進み具合を正確に記録しましょう。
+                    </p>
+                    <div class="mt-4 pt-4 border-t border-blue-500/40 flex flex-wrap gap-3 items-center">
+                        <button @click="navigateToChapter(lastOpenedChapterId)" class="bg-white text-blue-800 hover:bg-blue-50 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow transition-colors flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-rotate-left"></i>
+                            <span>前回開いた章（Chapter {{ String(lastOpenedChapterId).padStart(2, '0') }}）に戻る</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Learning Progress vs Practice Progress (Separated) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 1. 学習の進捗 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center space-x-2 text-blue-700 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-graduation-cap text-xl"></i>
+                            <h3 class="font-bold text-base text-slate-800">学習の進捗</h3>
+                        </div>
+
+                        <!-- 読了した章数 -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-slate-600">
+                                <span>読了した章数</span>
+                                <span>{{ completedChaptersCount }} / 14 章 ({{ Math.round((completedChaptersCount/14)*100) }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: `${(completedChaptersCount/14)*100}%` }"></div>
+                            </div>
+                        </div>
+
+                        <!-- ワーク記入済みの章数 -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-slate-600">
+                                <span>ワーク記入済みの章数</span>
+                                <span>{{ completedWorksheetChaptersCount }} / 14 章 ({{ Math.round((completedWorksheetChaptersCount/14)*100) }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: `${(completedWorksheetChaptersCount/14)*100}%` }"></div>
+                            </div>
+                        </div>
+
+                        <!-- 章末チェックの達成項目数 -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-slate-600">
+                                <span>章末チェック達成項目数</span>
+                                <span>{{ chapterCheckProgress.checked }} / {{ chapterCheckProgress.total }} 項目 ({{ chapterCheckProgress.percentage }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-teal-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: `${chapterCheckProgress.percentage}%` }"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 実践の進捗 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center space-x-2 text-emerald-700 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-list-check text-xl"></i>
+                            <h3 class="font-bold text-base text-slate-800">実践の進捗</h3>
+                        </div>
+
+                        <!-- 30日ロードマップの完了状況 -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-slate-600">
+                                <span>30日ロードマップ完了項目数</span>
+                                <span>{{ roadmapProgress.completed }} / {{ roadmapProgress.total }} 項目 ({{ roadmapProgress.percentage }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: `${roadmapProgress.percentage}%` }"></div>
+                            </div>
+                        </div>
+
+                        <!-- 補足案内 -->
+                        <div class="p-3 bg-emerald-50 text-emerald-900 text-xs rounded-xl border border-emerald-100 leading-relaxed">
+                            <i class="fa-solid fa-circle-info mr-1"></i>
+                            フォロワー数や売上ではなく、ロードマップの実践項目完了数で実践の進捗を記録・確認します。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 今日やること1つの記録欄 -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-base text-slate-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-bullseye text-amber-500"></i>
+                            <span>今日やること1つ</span>
+                        </label>
+                        <span class="text-xs text-slate-400">いつでも更新可能</span>
+                    </div>
+                    <p class="text-xs text-slate-500">無理のない小さな行動を1つだけ決めて実行しましょう。</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" v-model="todayAction" placeholder="例: Chapter 01 のターゲット候補を1人ノートに書く" class="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button @click="saveTodayAction" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-semibold rounded-xl transition-colors shrink-0">
+                            保存する
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 章の一覧ショートカット -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-base text-slate-800 mb-4">全14章 学習ステータス一覧</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <div v-for="ch in chapters" :key="ch.id" @click="navigateToChapter(ch.id)" class="p-3 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-sm cursor-pointer transition-all bg-slate-50 flex items-center justify-between">
+                            <div class="space-y-0.5">
+                                <div class="text-xs font-bold text-blue-700">Chapter {{ String(ch.id).padStart(2, '0') }}</div>
+                                <div class="text-xs font-semibold text-slate-800 truncate max-w-[180px]">{{ ch.title }}</div>
+                            </div>
+                            <div class="flex flex-col items-end text-[10px] space-y-1">
+                                <span :class="['px-2 py-0.5 rounded-full font-medium', getChapterRecord(ch.id).read ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-600']">
+                                    {{ getChapterRecord(ch.id).read ? '読了' : '未読' }}
+                                </span>
+                                <span :class="['px-2 py-0.5 rounded-full font-medium', getWorksheetBadgeClass(getChapterRecord(ch.id).worksheetStatus)]">
+                                    {{ getWorksheetStatusText(getChapterRecord(ch.id).worksheetStatus) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ② 章ごとの学習 -->
+            <div v-if="currentTab === 'chapters'" class="space-y-6">
+                <!-- Chapter Selector header -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">章を選択</label>
+                        <select v-model="selectedChapterId" @change="onSelectChapter" class="w-full md:w-auto px-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option v-for="ch in chapters" :key="ch.id" :value="ch.id">
+                                Chapter {{ String(ch.id).padStart(2, '0') }}：{{ ch.title }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Pagination buttons -->
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button @click="navigateToChapter(selectedChapterId - 1)" :disabled="selectedChapterId === 1" class="px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> 前の章
+                        </button>
+                        <button @click="navigateToChapter(selectedChapterId + 1)" :disabled="selectedChapterId === 14" class="px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100">
+                            次の章 <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current Chapter Content Container -->
+                <div v-if="currentChapter" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    
+                    <!-- Chapter Header Banner -->
+                    <div class="bg-slate-900 text-white p-6 sm:p-8">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold bg-blue-600 text-white px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                    Chapter {{ String(currentChapter.id).padStart(2, '0') }}
+                                </span>
+                                <h2 class="text-xl sm:text-2xl font-bold mt-2 text-white">{{ currentChapter.title }}</h2>
+                            </div>
+                        </div>
+
+                        <!-- Status Controls inside Chapter Header -->
+                        <div class="mt-6 pt-6 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                            <!-- 1. 読了チェック -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" v-model="currentChapterRecord.read" @change="saveData" class="w-4 h-4 text-blue-600 rounded">
+                                    <span class="font-bold text-slate-200">この章を読了した</span>
+                                </label>
+                                <div class="text-[11px] text-slate-400">
+                                    読了日: 
+                                    <input type="date" v-model="currentChapterRecord.readDate" @change="saveData" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <!-- 2. ワーク記入状況 -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2">
+                                <div class="font-bold text-slate-200">ワーク記入状況</div>
+                                <select v-model="currentChapterRecord.worksheetStatus" @change="saveData" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none">
+                                    <option value="unstarted">未着手</option>
+                                    <option value="in_progress">記入中</option>
+                                    <option value="completed">記入済み</option>
+                                </select>
+                            </div>
+
+                            <!-- 3. ワーク記入完了日 -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2">
+                                <div class="font-bold text-slate-200">ワーク記入完了日</div>
+                                <input type="date" v-model="currentChapterRecord.worksheetCompletedDate" @change="saveData" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none">
+                            </div>
+
+                            <!-- 4. 章末チェック進捗概要 -->
+                            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col justify-between space-y-1">
+                                <div class="font-bold text-slate-200">章末チェック達成度</div>
+                                <div class="text-sm font-bold text-emerald-400">
+                                    {{ currentChapterCheckedCount }} / {{ currentChapter.checklist.length }} 項目
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chapter Section Order Requirement:
+                        1. この章のゴール
+                        2. 読む前の問い
+                        3. 学習内容
+                        4. テンプレート・NG例・改善例
+                        5. 対応するワークシートの案内
+                        6. 章末チェック
+                        7. 今日やること1つ
+                    -->
+                    <div class="p-6 sm:p-8 space-y-8">
+                        
+                        <!-- 1. この章のゴール -->
+                        <section class="bg-blue-50/70 border-l-4 border-blue-600 p-4 rounded-r-xl">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-blue-800 mb-1">この章のゴール</h3>
+                            <p class="text-sm font-bold text-slate-800">{{ currentChapter.goal }}</p>
+                        </section>
+
+                        <!-- 2. 読む前の問い -->
+                        <section class="bg-amber-50/70 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-800 mb-1">読む前の問い</h3>
+                            <p class="text-sm font-bold text-slate-800">{{ currentChapter.question }}</p>
+                        </section>
+
+                        <!-- 3. 学習内容 (見出しごとに表示・折りたたみ可能) -->
+                        <section class="space-y-3">
+                            <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center justify-between">
+                                <span>学習内容</span>
+                                <span class="text-xs font-normal text-slate-500">（見出しをクリックして展開/折りたたみ）</span>
+                            </h3>
+
+                            <div class="space-y-3">
+                                <div v-for="(content, idx) in currentChapter.contents" :key="idx" class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                                    <button @click="toggleContentAccordion(currentChapter.id, idx)" class="w-full text-left p-4 font-bold text-sm text-slate-800 bg-slate-100 hover:bg-slate-200/70 transition-colors flex justify-between items-center">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-blue-600"><i class="fa-solid fa-bookmark"></i></span>
+                                            <span>{{ content.heading }}</span>
+                                            <span class="text-xs font-normal text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                                {{ content.page }}
+                                            </span>
+                                        </div>
+                                        <i :class="['fa-solid text-xs text-slate-500 transition-transform', isContentOpen(currentChapter.id, idx) ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+                                    </button>
+                                    
+                                    <div v-show="isContentOpen(currentChapter.id, idx)" class="p-4 bg-white text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line border-t border-slate-200">
+                                        {{ content.text }}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 4. テンプレート・NG例・改善例 -->
+                        <section class="space-y-4">
+                            <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
+                                テンプレート・NG例・改善例
+                            </h3>
+
+                            <!-- Template Box -->
+                            <div v-if="currentChapter.template" class="bg-slate-900 text-slate-100 p-4 sm:p-5 rounded-2xl space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center space-x-1">
+                                        <i class="fa-solid fa-file-code"></i>
+                                        <span>{{ currentChapter.template.title }}</span>
+                                    </span>
+                                    <button @click="copyToClipboard(currentChapter.template.code)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center space-x-1">
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span>コピー</span>
+                                    </button>
+                                </div>
+                                <pre class="text-xs sm:text-sm font-mono bg-slate-950 p-4 rounded-xl overflow-x-auto whitespace-pre-wrap leading-relaxed text-slate-200">{{ currentChapter.template.code }}</pre>
+                            </div>
+
+                            <!-- NG & Improvement Case -->
+                            <div v-if="currentChapter.caseStudy" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-2">
+                                    <div class="text-xs font-bold text-rose-700 flex items-center space-x-1">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                        <span>NG例</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-rose-950 leading-relaxed">{{ currentChapter.caseStudy.ng }}</p>
+                                </div>
+                                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2">
+                                    <div class="text-xs font-bold text-emerald-700 flex items-center space-x-1">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span>IMPROVE (改善例)</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-emerald-950 leading-relaxed">{{ currentChapter.caseStudy.improve }}</p>
+                                </div>
+                                <div v-if="currentChapter.caseStudy.point" class="md:col-span-2 bg-slate-100 p-3 rounded-xl text-xs text-slate-700 font-medium">
+                                    💡 改善ポイント: {{ currentChapter.caseStudy.point }}
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 5. 対応するワークシートの案内 -->
+                        <section class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-2">
+                            <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider flex items-center space-x-1">
+                                <i class="fa-solid fa-book-bookmark"></i>
+                                <span>対応するワークシートの案内</span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-indigo-950 leading-relaxed font-medium">
+                                {{ currentChapter.worksheetNotice }}
+                            </p>
+                            <div class="pt-2 text-xs text-indigo-700">
+                                ワークの記入管理は「③ ワーク記入状況」タブから行えます。
+                            </div>
+                        </section>
+
+                        <!-- 6. 章末チェック -->
+                        <section class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-sm text-slate-900 flex items-center space-x-2">
+                                    <i class="fa-solid fa-list-check text-blue-600"></i>
+                                    <span>第{{ currentChapter.id }}章 チェックリスト（資料の文言そのまま）</span>
+                                </h3>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    {{ currentChapterCheckedCount }} / {{ currentChapter.checklist.length }} 達成
+                                </span>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label v-for="(item, idx) in currentChapter.checklist" :key="idx" class="flex items-start space-x-3 p-3 bg-white rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer transition-colors">
+                                    <input type="checkbox" :checked="isChapterCheckmarked(currentChapter.id, idx)" @change="toggleChapterCheckmark(currentChapter.id, idx)" class="mt-0.5 w-4 h-4 text-blue-600 rounded">
+                                    <span :class="['text-xs sm:text-sm leading-relaxed', isChapterCheckmarked(currentChapter.id, idx) ? 'line-through text-slate-400 font-normal' : 'text-slate-800 font-medium']">
+                                        {{ item }}
+                                    </span>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!-- 7. 今日やること1つ -->
+                        <section class="bg-amber-50/50 border border-amber-200 rounded-2xl p-5 space-y-3">
+                            <h3 class="font-bold text-sm text-amber-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-flag text-amber-600"></i>
+                                <span>この章に関して今日やること1つ</span>
+                            </h3>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" v-model="currentChapterRecord.todayAction" @change="saveData" placeholder="例: ターゲットの悩みを1人分ノートに書き出す" class="flex-1 px-4 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                <button @click="saveData" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors">
+                                    保存
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ③ ワーク記入状況 -->
+            <div v-if="currentTab === 'worksheet'" class="space-y-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-2">
+                    <h2 class="text-lg font-bold text-slate-900">ワーク記入状況一覧</h2>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        回答本文は別途ご自身のワークシート（ノートや別冊ワークブック）へ記入します。<br>
+                        アプリでは「第○章に対応するワーク」の進み具合と、参照先（ノートのページやファイルURL等）を記録してください。
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b border-slate-200">
+                                    <th class="p-4 w-1/4">章番号と章名</th>
+                                    <th class="p-4 w-1/3">対応ワークシートの参照先</th>
+                                    <th class="p-4 w-1/6">ステータス</th>
+                                    <th class="p-4 w-1/6">記入完了日</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-xs sm:text-sm">
+                                <tr v-for="ch in chapters" :key="ch.id" class="hover:bg-slate-50 transition-colors">
+                                    <!-- 章番号と章名 -->
+                                    <td class="p-4 font-bold text-slate-800">
+                                        <div class="text-blue-600 text-xs">Chapter {{ String(ch.id).padStart(2, '0') }}</div>
+                                        <div>{{ ch.title }}</div>
+                                        <div class="text-[11px] text-slate-400 font-normal mt-0.5">第{{ ch.id }}章に対応するワーク</div>
+                                    </td>
+
+                                    <!-- 対応するワークシートの参照先 (設定可能) -->
+                                    <td class="p-4">
+                                        <div class="space-y-1">
+                                            <input type="text" v-model="getChapterRecord(ch.id).worksheetRef" @change="saveData" placeholder="ワークシート参照先：未設定" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                            <div class="text-[10px] text-slate-400">
+                                                未入力時の表示: {{ getChapterRecord(ch.id).worksheetRef ? getChapterRecord(ch.id).worksheetRef : 'ワークシート参照先：未設定' }}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- ステータス (未着手/記入中/記入済み) -->
+                                    <td class="p-4">
+                                        <select v-model="getChapterRecord(ch.id).worksheetStatus" @change="saveData" class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
+                                            <option value="unstarted">未着手</option>
+                                            <option value="in_progress">記入中</option>
+                                            <option value="completed">記入済み</option>
+                                        </select>
+                                    </td>
+
+                                    <!-- 記入完了日 -->
+                                    <td class="p-4">
+                                        <input type="date" v-model="getChapterRecord(ch.id).worksheetCompletedDate" @change="saveData" class="px-2 py-1 border border-slate-300 rounded-lg text-xs focus:outline-none">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ④ 30日ロードマップ -->
+            <div v-if="currentTab === 'roadmap'" class="space-y-6">
+                <!-- Banner & Overall Progress -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">30日SNS運用ロードマップ</h2>
+                            <p class="text-xs sm:text-sm text-slate-600">資料記載通りのロードマップで実践を進めます。</p>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-right">
+                            <div class="text-xs text-emerald-800 font-semibold">実践項目完了進捗</div>
+                            <div class="text-lg font-bold text-emerald-700">
+                                {{ roadmapProgress.completed }} / {{ roadmapProgress.total }} 項目 ({{ roadmapProgress.percentage }}%)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div class="bg-emerald-600 h-3 rounded-full transition-all duration-300" :style="{ width: `${roadmapProgress.percentage}%` }"></div>
+                    </div>
+                </div>
+
+                <!-- Weeks Grid -->
+                <div class="space-y-6">
+                    <div v-for="week in roadmapData" :key="week.week" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <!-- Week Title Header -->
+                        <div class="bg-slate-800 text-white p-4 px-6 flex justify-between items-center">
+                            <h3 class="font-bold text-base flex items-center space-x-2">
+                                <span class="bg-emerald-500 text-slate-950 text-xs font-bold px-2.5 py-0.5 rounded-full">Week {{ week.week }}</span>
+                                <span>{{ week.title }}</span>
+                            </h3>
+                            <span class="text-xs text-slate-400">
+                                完了: {{ getWeekCompletedCount(week.week) }} / {{ week.items.length }}
+                            </span>
+                        </div>
+
+                        <!-- Items List -->
+                        <div class="divide-y divide-slate-100">
+                            <div v-for="item in week.items" :key="item.id" class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
+                                <div class="space-y-1">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                            {{ item.dayLabel }}
+                                        </span>
+                                        <span class="font-bold text-sm text-slate-800">{{ item.task }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3 shrink-0 text-xs">
+                                    <!-- Status selector -->
+                                    <div>
+                                        <select v-model="getRoadmapRecord(item.id).status" @change="saveData" class="px-2.5 py-1.5 border border-slate-300 rounded-lg font-semibold focus:outline-none">
+                                            <option value="unstarted">未着手</option>
+                                            <option value="in_progress">取り組み中</option>
+                                            <option value="completed">完了</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Date input -->
+                                    <div class="flex items-center space-x-1">
+                                        <span class="text-slate-500">実施日:</span>
+                                        <input type="date" v-model="getRoadmapRecord(item.id).date" @change="saveData" class="px-2 py-1 border border-slate-300 rounded-lg focus:outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB ⑤ 振り返り・最終確認 -->
+            <div v-if="currentTab === 'review'" class="space-y-8">
+                
+                <!-- Section Header -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-2">
+                    <h2 class="text-lg font-bold text-slate-900">振り返り・最終確認</h2>
+                    <p class="text-xs sm:text-sm text-slate-600">
+                        資料に記載されている「週次分析」「改善テーマ」テンプレートと「30日終了チェック」「最終チェックリスト」の確認画面です。
+                    </p>
+                </div>
+
+                <!-- 1. 振り返りテンプレート & 記録履歴 -->
+                <div class="space-y-6">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
+                        振り返りテンプレート & 実施履歴
+                    </h3>
+
+                    <!-- Reference Templates Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 週次分析テンプレ -->
+                        <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">週次分析テンプレ</span>
+                                <button @click="copyToClipboard(weeklyAnalysisTemplateText)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold">
+                                    コピー
+                                </button>
+                            </div>
+                            <pre class="text-xs font-mono bg-slate-950 p-3 rounded-xl whitespace-pre-wrap leading-relaxed text-slate-200">{{ weeklyAnalysisTemplateText }}</pre>
+                        </div>
+
+                        <!-- 改善テーマテンプレ -->
+                        <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">改善テーマテンプレ</span>
+                                <button @click="copyToClipboard(improvementThemeTemplateText)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded-lg font-semibold">
+                                    コピー
+                                </button>
+                            </div>
+                            <pre class="text-xs font-mono bg-slate-950 p-3 rounded-xl whitespace-pre-wrap leading-relaxed text-slate-200">{{ improvementThemeTemplateText }}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Add New Review Record Form -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                        <h4 class="font-bold text-sm text-slate-800">振り返り記録の追加（上書きせず履歴として残せます）</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">対象の週または月</label>
+                                <input type="text" v-model="newReview.targetPeriod" placeholder="例: Week 1 または 10月第1週" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">ワーク記入状況</label>
+                                <select v-model="newReview.worksheetStatus" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none">
+                                    <option value="unstarted">未着手</option>
+                                    <option value="in_progress">記入中</option>
+                                    <option value="completed">記入済み</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">記入完了日</label>
+                                <input type="date" v-model="newReview.completedDate" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">改善テーマの確認日</label>
+                                <input type="date" v-model="newReview.confirmedDate" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:outline-none">
+                            </div>
+                        </div>
+                        <button @click="addReviewHistory" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors">
+                            履歴に追加登録する
+                        </button>
+                    </div>
+
+                    <!-- Review History Table -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold text-sm text-slate-800">
+                            振り返り記録履歴 (全{{ reviewHistory.length }}件)
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-bold">
+                                        <th class="p-3">対象の週または月</th>
+                                        <th class="p-3">ワーク記入状況</th>
+                                        <th class="p-3">記入完了日</th>
+                                        <th class="p-3">改善テーマ確認日</th>
+                                        <th class="p-3 w-16">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <tr v-if="reviewHistory.length === 0">
+                                        <td colspan="5" class="p-6 text-center text-slate-400">
+                                            まだ振り返り記録がありません。上のフォームから登録してください。
+                                        </td>
+                                    </tr>
+                                    <tr v-for="(item, index) in reviewHistory" :key="index" class="hover:bg-slate-50">
+                                        <td class="p-3 font-bold text-slate-800">{{ item.targetPeriod }}</td>
+                                        <td class="p-3">
+                                            <span :class="['px-2 py-0.5 rounded-full text-xs font-semibold', getWorksheetBadgeClass(item.worksheetStatus)]">
+                                                {{ getWorksheetStatusText(item.worksheetStatus) }}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-slate-600">{{ item.completedDate || '未記録' }}</td>
+                                        <td class="p-3 text-slate-600">{{ item.confirmedDate || '未記録' }}</td>
+                                        <td class="p-3">
+                                            <button @click="deleteReviewHistory(index)" class="text-rose-600 hover:text-rose-800 font-semibold text-xs">
+                                                削除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 30日終了チェック -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-base text-slate-900 flex items-center space-x-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-flag-checkered text-emerald-600"></i>
+                        <span>30日終了チェック（資料の文言そのまま）</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label v-for="(item, idx) in day30CompletionChecklist" :key="idx" class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer">
+                            <input type="checkbox" :checked="isDay30Checked(idx)" @change="toggleDay30Check(idx)" class="w-4 h-4 text-emerald-600 rounded">
+                            <span :class="['text-xs sm:text-sm', isDay30Checked(idx) ? 'line-through text-slate-400' : 'text-slate-800 font-medium']">
+                                {{ item }}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. 最終チェックリスト -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                    <h3 class="font-bold text-base text-slate-900 flex items-center space-x-2 border-b border-slate-100 pb-3">
+                        <i class="fa-solid fa-square-check text-blue-600"></i>
+                        <span>最終チェックリスト（資料の文言そのまま）</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div v-for="(category, catKey) in finalChecklist" :key="catKey" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <h4 class="font-bold text-sm text-slate-800 border-b border-slate-200 pb-2 flex items-center justify-between">
+                                <span>{{ category.title }}</span>
+                            </h4>
+                            <div class="space-y-2">
+                                <label v-for="(item, idx) in category.items" :key="idx" class="flex items-start space-x-3 p-2 bg-white rounded-lg border border-slate-200 hover:border-slate-300 cursor-pointer">
+                                    <input type="checkbox" :checked="isFinalCheckmarked(catKey, idx)" @change="toggleFinalCheckmark(catKey, idx)" class="mt-0.5 w-4 h-4 text-blue-600 rounded">
+                                    <span :class="['text-xs sm:text-sm', isFinalCheckmarked(catKey, idx) ? 'line-through text-slate-400' : 'text-slate-800 font-medium']">
+                                        {{ item }}
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- DATA BACKUP & RESTORE MODAL -->
+        <div v-if="openBackupModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-hard-drive text-blue-600"></i>
+                        <span>保存設定・データ管理</span>
+                    </h3>
+                    <button @click="openBackupModal = false" class="text-slate-400 hover:text-slate-600 text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Sync Warning -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 space-y-1">
+                    <div class="font-bold flex items-center space-x-1">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        <span>端末間自動同期についての注意</span>
+                    </div>
+                    <p class="leading-relaxed">
+                        本アプリの記録データは、現在ご利用中の端末・ブラウザー内にのみ保存されます。他の端末や異なるブラウザーとは自動的に同期されません。機種変更や別端末で利用される際は、下記「データ書き出し」機能をご利用ください。
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Export Data -->
+                    <div class="p-4 border border-slate-200 rounded-xl space-y-2">
+                        <div class="font-bold text-xs text-slate-800">1. 記録データの書き出し (エクスポート)</div>
+                        <p class="text-[11px] text-slate-500">現在の学習進捗や回答記録をJSONファイルとして保存します。</p>
+                        <button @click="exportData" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-download"></i>
+                            <span>JSONファイルとして書き出し</span>
+                        </button>
+                    </div>
+
+                    <!-- Import Data -->
+                    <div class="p-4 border border-slate-200 rounded-xl space-y-2">
+                        <div class="font-bold text-xs text-slate-800">2. 記録データの読み込み (インポート)</div>
+                        <p class="text-[11px] text-slate-500">保存したJSONファイルを指定して記録を復元します。</p>
+                        <input type="file" ref="fileInput" @change="importData" accept=".json" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                    </div>
+
+                    <!-- Reset Data -->
+                    <div class="p-4 border border-rose-200 bg-rose-50/50 rounded-xl space-y-2">
+                        <div class="font-bold text-xs text-rose-800">3. 全記録の初期化</div>
+                        <p class="text-[11px] text-rose-600">すべての記録データを消去し初期状態に戻します。</p>
+                        <button @click="confirmResetData" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>全記録を初期化する</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button @click="openBackupModal = false" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentTab: 'home',
+                    toastMessage: '',
+                    openBackupModal: false,
+                    selectedChapterId: 1,
+                    lastOpenedChapterId: 1,
+                    todayAction: '',
+                    accordionState: {}, // Stores accordion open/close per content
+
+                    // New review form data
+                    newReview: {
+                        targetPeriod: '',
+                        worksheetStatus: 'unstarted',
+                        completedDate: '',
+                        confirmedDate: ''
+                    },
+
+                    // User Saved Data Structure
+                    chapterRecords: {}, // { [chId]: { read: bool, readDate: '', worksheetStatus: '', worksheetRef: '', worksheetCompletedDate: '', todayAction: '', checklist: [bool] } }
+                    roadmapRecords: {}, // { [itemId]: { status: 'unstarted'|'in_progress'|'completed', date: '' } }
+                    reviewHistory: [],  // Array of review objects
+                    day30ChecklistRecords: [], // Array of bool
+                    finalChecklistRecords: {}, // { catKey: [bool] }
+
+                    // PDF Static Data Chapters (Strictly from SNS運用完全ガイド.pdf)
+                    chapters: [
+                        {
+                            id: 1,
+                            title: 'SNS運用を始める前に知っておくこと',
+                            goal: 'SNS を使う目的と、仕事につなげるまでの全体像を理解する。',
+                            question: 'あなたは SNS で「フォロワー」ではなく、最終的に何を増やしたいですか？',
+                            contents: [
+                                {
+                                    heading: 'SNSの目的を1つに絞る',
+                                    page: 'P.9参照',
+                                    text: 'ビジネスでSNSを使う場合、最初に決めるのは投稿頻度ではなく「何のために使うか」です。フォロワー数は途中の指標であり、最終目的とは限りません。\n目的が曖昧だと、投稿テーマ・プロフィール・誘導先がばらばらになりやすくなります。最初は最も重要な目的を1つ決め、後から必要に応じて追加します。\n・自分や事業を知ってもらう\n・商品・サービスを知ってもらう\n・問い合わせにつなげる\n・店舗への来店につなげる\n・専門家として認知される\n・将来の販売につながる接点を作る'
+                                },
+                                {
+                                    heading: '認知から行動までの5段階',
+                                    page: 'P.10参照',
+                                    text: 'SNS上では、知らない相手にいきなり購入を求めるより、認知→興味→信頼→比較→行動の順番で接点を作る方が自然です。\n投稿の役割を「売ること」だけにすると、毎回の投稿が広告のようになりやすくなります。どの段階の人に向けた投稿かを考えると、内容を決めやすくなります。\n・認知: 存在を知ってもらう\n・興味: 自分に関係があると感じてもらう\n・信頼: 何度か情報に触れてもらう\n・比較: プロフィールやサービスを確認してもらう\n・行動: 問い合わせ・購入・来店など'
+                                },
+                                {
+                                    heading: 'SNSの選び方',
+                                    page: 'P.11参照',
+                                    text: 'Instagram Threads ・Xにはそれぞれ特徴がありますが、初心者が最初からすべてを完璧に運用する必要はありません。\nまず1つを中心にして、発信テーマと運用リズムを整えます。慣れてから同じテーマを別SNS向けに調整すると、作業負担を増やしにくくなります。\n・Instagram: 画像・事例・世界観を見せたいとき\n・Threads: 短い文章で考え方や日常の気づきを発信したいとき\n・X: 短文・業界情報・考え方をテキスト中心で届けたいとき'
+                                }
+                            ],
+                            template: {
+                                title: 'SNSの目的テンプレ (P.9参照)',
+                                code: `私がSNSを使う目的は「＿＿＿＿」です。\n主に「＿＿＿＿」で困っている「＿＿＿＿」に向けて発信します。\n発信する内容は 1.＿＿＿＿ 2.＿＿＿＿ 3.＿＿＿＿ です。`
+                            },
+                            caseStudy: {
+                                ng: '「SNSを始めたら毎日3投稿して、とにかくフォロワーを増やします。」',
+                                improve: '「SNS 初心者の個人事業主に向けて、プロフィール・投稿ネタ・発信設計を週3〜4回発信します。」',
+                                point: '目的をフォロワー数ではなく、対象者と提供価値まで含めて具体化します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 01 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                'SNSを使う目的を1つ決めた',
+                                '最終的に取ってほしい行動を書いた',
+                                'ターゲット候補を1人イメージした',
+                                '中心に使う SNSを決めた',
+                                'フォロワー数だけを目的にしていない'
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: 'ターゲットを決める',
+                            goal: '誰のために発信するかを、悩みまで含めて1文で説明できるようになる。',
+                            question: 'あなたの投稿を最も必要としている人は、今どんなことで困っていますか?',
+                            contents: [
+                                {
+                                    heading: 'ターゲットは属性より「悩み」で決める',
+                                    page: 'P.14参照',
+                                    text: '「30代女性」「経営者」「主婦」だけでは、投稿内容を決めるには広すぎます。同じ属性でも、困っていることは人によって違うからです。\nSNSでは「今どんな状況で、何に困っていて、どうなりたいか」まで決めると、投稿の言葉が具体的になります。\n・今の状況\n・一番大きな悩み\n・過去に試したこと\n・理想の状態\n・使える時間\n・避けたいこと'
+                                },
+                                {
+                                    heading: 'ターゲットを5項目で深掘りする',
+                                    page: 'P.15参照',
+                                    text: 'ターゲット設計は人物像を細かく作り込むことが目的ではありません。投稿を考えるときの判断基準を作ることが目的です。\n「この人ならこの言葉は分かるか」「この例は自分ごととして読めるか」を判断できる程度まで具体化します。\n・どんな人か\n・今どんな状況か\n・何に困っているか\n・どうなりたいか\n・何を避けたいか'
+                                },
+                                {
+                                    heading: '広すぎるターゲットを修正する',
+                                    page: 'P.16参照',
+                                    text: '広いターゲットは、誰にも強く刺さらない文章になりやすくなります。最初は「この人に届ける」と1人に近いイメージまで絞って構いません。\n対象者を絞ることは、他の人を排除することではありません。文章を書く際の「主な読者」を決める作業です。'
+                                }
+                            ],
+                            template: {
+                                title: 'ターゲット完成テンプレ (P.14参照)',
+                                code: `私の主なターゲットは「＿＿＿＿を始めたいが、＿＿＿＿で困っている＿＿＿＿」です。\nこの人は今「＿＿＿＿」という状態です。\n理想は「＿＿＿＿」という状態です。`
+                            },
+                            caseStudy: {
+                                ng: '「20〜60代の男女、経営者、会社員、主婦、副業を始めたい人」',
+                                improve: '「SNS を仕事に活用したいが、投稿内容が決まらず困っている個人事業主」',
+                                point: '属性を広げるより、「今の悩み」を具体化します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 02 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                'ターゲットを一文で言える',
+                                '悩みを5個以上書いた',
+                                '理想の状態を書いた',
+                                'SNS経験を書いた',
+                                '避けたい作業を書いた',
+                                '「初心者」だけで終わっていない'
+                            ]
+                        },
+                        {
+                            id: 3,
+                            title: '発信テーマとコンセプトを決める',
+                            goal: '何を発信するアカウントなのかを3本柱で整理する。',
+                            question: '初めて見た人が、あなたのアカウントを一言で説明できますか?',
+                            contents: [
+                                {
+                                    heading: '発信テーマを3本柱に分ける',
+                                    page: 'P.19参照',
+                                    text: '「SNS について発信」だけでは範囲が広すぎます。大テーマを決めたら、その中を 3 本程度の柱に分けます。\n柱を作ると、投稿ネタが偏りにくくなり、初めてアカウントを見た人にも何の情報が得られるか伝わりやすくなります。\n・例：プロフィール設計\n・例：投稿作成\n・例：商品・サービス導線'
+                                },
+                                {
+                                    heading: '発信テーマの3条件',
+                                    page: 'P.20参照',
+                                    text: '発信テーマは、自分が話したいことだけで決めないことがポイントです。ターゲットの悩み・自分が継続して話せること・商品やサービスとのつながりの3点で確認します。\n・ターゲットの悩みとつながっている\n・自分が継続して話せる\n・商品・サービスと大きくズレていない'
+                                },
+                                {
+                                    heading: 'コンセプト文を完成させる',
+                                    page: 'P.21参照',
+                                    text: '発信テーマを決めたら、「誰に・何を・どんな状態を目指して」発信するのかを1文にします。これが投稿・プロフィール・固定投稿の土台になります。\n言葉が長くなったら、対象者・3本柱・得られる状態の3要素だけ残して短くします。'
+                                }
+                            ],
+                            template: {
+                                title: '発信コンセプトテンプレ (P.19参照)',
+                                code: `私の発信テーマは「＿＿＿＿」です。\n主な発信の柱は 1.＿＿＿＿ 2.＿＿＿＿ 3.＿＿＿＿ です。\nこの発信によって「＿＿＿＿で困っている人」が「＿＿＿＿できる状態」を目指します。`
+                            },
+                            caseStudy: {
+                                ng: '「SNSやビジネス、日常について発信します。」',
+                                improve: '「SNSを仕事に活用したい個人事業主向けに、プロフィール・投稿作成・導線改善を発信します。」',
+                                point: '大テーマだけでなく、対象者と3本柱を明確にします。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 03 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '大テーマを1つ決めた',
+                                '発信の柱を3つ程度に分けた',
+                                'ターゲットの悩みとつながっている',
+                                '商品・サービスとズレていない',
+                                '一文のコンセプトにできた'
+                            ]
+                        },
+                        {
+                            id: 4,
+                            title: 'アカウント設計',
+                            goal: '名前・肩書き・発信内容・行動導線を一貫させる。',
+                            question: '見た目を整える前に、アカウントの「役割」を言葉にできていますか?',
+                            contents: [
+                                {
+                                    heading: 'アカウント設計の6要素',
+                                    page: 'P.24参照',
+                                    text: 'アカウント設計では、ロゴや色を決める前に役割を決めます。「誰向けの何のアカウントか」が分かれば、見た目は後から調整できます。\n・アカウント名\n・アイコン\n・肩書き\n・発信テーマ\n・投稿の雰囲気\n・次の行動'
+                                },
+                                {
+                                    heading: '肩書きは格好良さより分かりやすさ',
+                                    page: 'P.25参照',
+                                    text: '初めて見る人に意味が伝わらない肩書きは、専門性があっても価値が伝わりにくくなります。対象者か提供内容のどちらかを入れると整理しやすくなります。\n肩書きは一度決めたら永久に固定するものではありません。発信内容が定まった後に微調整できます。'
+                                },
+                                {
+                                    heading: '投稿ルールを軽く決める',
+                                    page: 'P.26参照',
+                                    text: '曜日固定は必須ではありません。ただし「ノウハウ・失敗例・テンプレ・事例」など、投稿タイプのバランスを先に決めておくと、毎回の迷いを減らせます。\n・月: 初心者向けノウハウ\n・水: よくある失敗\n・金: テンプレート\n・日: 振り返り・考え方'
+                                }
+                            ],
+                            template: {
+                                title: 'アカウント設計テンプレ (P.24参照)',
+                                code: `このアカウントは「＿＿＿＿向け」に、「＿＿＿＿」を発信するアカウントです。\nフォローすることで「＿＿＿＿」を目指せます。`
+                            },
+                            caseStudy: {
+                                ng: '「TARO LIFE/挑戦する人/SNS・旅行・投資・日常」',
+                                improve: '「TARO|個人事業主のSNS運用/SNS初心者向け発信設計/プロフィール・投稿・導線」',
+                                point: '見た目より先に、役割とテーマを揃えます。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 04に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                'アカウント名から人物・テーマが分かる',
+                                '肩書きが難しすぎない',
+                                '対象者が明確',
+                                '3本柱が決まっている',
+                                '次に取ってほしい行動が決まっている'
+                            ]
+                        },
+                        {
+                            id: 5,
+                            title: 'プロフィールを作る',
+                            goal: '初見ユーザーが数秒で「誰向けの何のアカウントか」を理解できるようにする。',
+                            question: 'プロフィールは自己紹介になっていますか、それとも読者への案内になっていますか?',
+                            contents: [
+                                {
+                                    heading: 'プロフィールの5要素',
+                                    page: 'P.29参照',
+                                    text: 'プロフィールは「自分の経歴を全部書く場所」ではなく、初めて訪れた人への案内板です。数秒で「自分に関係があるか」を判断できる状態を目指します。\n・誰向けか\n・何を発信しているか\n・どんな価値があるか\n・事実に基づく信頼材料\n・次の行動'
+                                },
+                                {
+                                    heading: '1行目から順番に作る',
+                                    page: 'P.30参照',
+                                    text: '最初に対象者を書き、その次に発信内容、得られる価値、信頼材料、次の行動を置きます。すべてを盛り込めない場合は、「誰向け・何を発信・次の行動」を優先します。'
+                                },
+                                {
+                                    heading: 'プロフィールのNGを直す',
+                                    page: 'P.31参照',
+                                    text: '「自由に楽しく生きる」「挑戦する人」のような抽象表現だけでは、何のアカウントか判断しにくくなります。具体的な対象者やテーマを1つ足すだけでも伝わり方が変わります。\n趣味や人柄情報を入れること自体は問題ありません。ただし、ビジネス目的なら発信内容より先に置かない方が整理しやすくなります。'
+                                }
+                            ],
+                            template: {
+                                title: 'プロフィールテンプレ (P.29参照)',
+                                code: `「＿＿＿＿」で悩む「＿＿＿＿」へ\n「＿＿＿＿」について発信\n「＿＿＿＿」を目指したい方に向けた情報を掲載\n初めての方は「＿＿＿＿」をご覧ください`
+                            },
+                            caseStudy: {
+                                ng: '「自由に楽しく生きる38歳。旅行とカフェが好き。毎日成長。」',
+                                improve: '「SNSを始めたい個人事業主へ/投稿ネタ・プロフィール・導線づくりを解説/初めての方は固定投稿へ」',
+                                point: '自己紹介より先に、相手に何を届けるかを伝えます。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 05 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '誰向けか分かる',
+                                '何を発信しているか分かる',
+                                '得られる価値が書かれている',
+                                '根拠のない実績を書いていない',
+                                '次の行動が分かる'
+                            ]
+                        },
+                        {
+                            id: 6,
+                            title: '投稿ネタを作る',
+                            goal: '投稿当日にゼロから考えず、30案以上のネタを準備できるようになる。',
+                            question: 'ネタ切れの原因は、本当に知識不足でしょうか?',
+                            contents: [
+                                {
+                                    heading: '投稿ネタは「悩み」から作る',
+                                    page: 'P.34参照',
+                                    text: '投稿ネタを毎回ゼロから考えると、継続が難しくなります。ターゲットの悩み・質問・失敗・誤解・不安・理想から切り口を作ると、同じテーマから複数の投稿を作れます。\n・悩み解決 / 初心者向け解説 / よくある失敗 / チェックリスト / 比較 / Q&A / 体験・気づき / 考え方 / 商品・サービス紹介 / 人柄'
+                                },
+                                {
+                                    heading: '3テーマ×10切り口で30案',
+                                    page: 'P.35参照',
+                                    text: '3本の発信柱それぞれに10切り口を当てると、30案を作れます。同じテーマでも「NG例」「Q&A」「比較」に変えるだけで別の投稿になります。\n新しい知識を毎回探すのではなく、既に決めたテーマを別角度から説明することを優先します。'
+                                },
+                                {
+                                    heading: 'ネタ帳を作る',
+                                    page: 'P.36参照',
+                                    text: '投稿当日に考えず、思いついたときにストックします。最低でも3〜5投稿、慣れたら30案程度を持っておくと、忙しい時期も運用しやすくなります。'
+                                }
+                            ],
+                            template: {
+                                title: '投稿ネタ作成テンプレ (P.34参照)',
+                                code: `テーマ:\n初心者の悩み:\nよくある質問:\nNG例:\n改善例:\nチェックリスト:\n方法:\n比較:\n体験・気づき:`
+                            },
+                            caseStudy: {
+                                ng: '「SNS投稿のコツ」',
+                                improve: '「SNS 初心者が投稿前に確認したい5項目」',
+                                point: 'テーマを「誰向け+何を確認するか」まで具体化します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 06 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '発信の柱を 3 つ用意した',
+                                '各柱から 10 案出した',
+                                '悩みからネタを作った',
+                                'Q&A からネタを作った',
+                                '商品紹介だけに偏っていない'
+                            ]
+                        },
+                        {
+                            id: 7,
+                            title: '読まれやすい投稿の基本構成',
+                            goal: 'フック・悩み・結論・理由・具体例・次の行動の順で投稿を組めるようになる。',
+                            question: 'あなたの投稿は最初の数行で「読む理由」が伝わっていますか?',
+                            contents: [
+                                {
+                                    heading: '基本の6ステップ',
+                                    page: 'P.39参照',
+                                    text: '初心者は、思いついた順番ではなく「フック→悩み→結論→理由→具体例→次の行動」の順に組むと、読み手が理解しやすくなります。\n・フック: 続きを読む理由\n・悩み: 自分ごと化\n・結論: 先に答え\n・理由: 納得材料\n・具体例: 真似できる形\n・次の行動: 読後の一歩'
+                                },
+                                {
+                                    heading: '1投稿1テーマにする',
+                                    page: 'P.40参照',
+                                    text: '1つの投稿にプロフィール、時間管理、商品紹介、マインドを全部入れると、結論がぼやけます。「今日この投稿で何を1つ持ち帰ってほしいか」を決めます。'
+                                },
+                                {
+                                    heading: '抽象論の直後に具体例を置く',
+                                    page: 'P.41参照',
+                                    text: '「プロフィールは分かりやすくしましょう」で終わらず、「1行目に『SNS初心者の個人事業主へ』と対象者を書く」のように、実際の行動まで落とします。\n次の行動も1つに絞ります。「保存・コメント・プロフィール・購入」を同時に求めないようにします。'
+                                }
+                            ],
+                            template: {
+                                title: '基本投稿テンプレ (P.39参照)',
+                                code: `【フック】「＿＿＿＿で悩んでいませんか?」\n【悩み】「＿＿＿＿すると、＿＿＿＿になりやすくなります。」\n【結論】「まずは＿＿＿＿してみてください。」\n【理由】「なぜなら、＿＿＿＿だからです。」\n【具体例】「例えば、＿＿＿＿。」\n【次の行動】「今日、まず＿＿＿＿だけ確認してみてください。」`
+                            },
+                            caseStudy: {
+                                ng: '「SNSは重要です。継続しましょう。皆さんも頑張りましょう。」',
+                                improve: '「SNS投稿が続かない人へ。毎回直前にネタを考えていませんか? 発信テーマを3つに分け、各10案を先に作ると30投稿分のネタになります。」',
+                                point: '抽象論を、悩み・手順・具体例・次の行動へ落とします。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 07に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '1投稿1テーマ',
+                                '冒頭で内容が分かる',
+                                '結論がある',
+                                '理由がある',
+                                '具体例がある',
+                                '次の行動が1つ示されている'
+                            ]
+                        },
+                        {
+                            id: 8,
+                            title: '投稿タイプ別テンプレート',
+                            goal: '目的に応じて投稿の型を使い分け、作成時間を減らす。',
+                            question: '毎回同じ種類の投稿になっていませんか?',
+                            contents: [
+                                {
+                                    heading: '10種類の投稿を使い分ける',
+                                    page: 'P.44参照',
+                                    text: '目的に合わせて投稿の型を変えます。すべてを同じ書き方にしないことで、発信に変化が出て、ネタも広げやすくなります。\n・共感 / ノウハウ / 失敗談 / Before/After / チェックリスト / Q&A / ストーリー / 商品・サービス紹介 / 事例紹介 / 自己紹介・価値観'
+                                },
+                                {
+                                    heading: '共感・ノウハウ・失敗談の型',
+                                    page: 'P.45参照',
+                                    text: '共感投稿は「分かってくれている」、ノウハウ投稿は「役立つ」、失敗談投稿は「現場感がある」と感じてもらうために使います。\n毎週 3 投稿なら、ノウハウ・共感・チェックリストのように種類を変えるだけでも単調さを減らせます。'
+                                },
+                                {
+                                    heading: '商品紹介は悩みから始める',
+                                    page: 'P.46参照',
+                                    text: '商品名から始めるより、「誰のどんな悩みを解決するのか」から始めると、読み手が自分に関係するか判断しやすくなります。\n商品説明では、対象者・提供内容・向いている人・次の行動を明確にします。成果保証に見える表現は避けます。'
+                                }
+                            ],
+                            template: {
+                                title: '投稿タイプ選択テンプレ (P.44参照)',
+                                code: `今週使う投稿タイプ:\n目的:\n伝える悩み:\n使う具体例:\n最後の行動:`
+                            },
+                            caseStudy: {
+                                ng: '「新サービス開始！ぜひ買ってください！」',
+                                improve: '「SNS を始めたものの、プロフィールと投稿内容が決まらず止まっている方向けに、発信設計を整理するサービスを用意しました。」',
+                                point: '商品名より先に、対象者の悩みから始めます。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 08に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '3種類以上の投稿タイプを使える',
+                                '共感投稿を作れる',
+                                'ノウハウ投稿を作れる',
+                                'Q&A投稿を作れる',
+                                '商品紹介だけに偏っていない'
+                            ]
+                        },
+                        {
+                            id: 9,
+                            title: '売り込み感を減らす信頼構築',
+                            goal: '役立つ情報・共感・人柄・事例・商品紹介をバランスよく配置する。',
+                            question: '商品を紹介していない時にも、読者があなたを知る理由がありますか？',
+                            contents: [
+                                {
+                                    heading: '信頼を作る5種類の発信',
+                                    page: 'P.49参照',
+                                    text: '販売につなげたい場合でも、すべての投稿を販売投稿にする必要はありません。役立つ情報・共感・事例・人柄・商品案内を混ぜます。\n・教育・ノウハウ / 共感 / 証拠・事例 / 人柄 / 商品・サービス'
+                                },
+                                {
+                                    heading: '10投稿のバランス例',
+                                    page: 'P.50参照',
+                                    text: '固定比率ではありませんが、ノウハウ4、共感2、人柄1、事例1、商品2のように分けると、広告ばかりになりにくくなります。反応を見ながら調整してください。\n逆にノウハウだけでも「何の商品・サービスを提供している人か」が伝わらない場合があります。案内投稿も必要です。'
+                                },
+                                {
+                                    heading: '売り込み感を減らす',
+                                    page: 'P.51参照',
+                                    text: '「買ってください」だけではなく、「こんな悩みの方へ」「こういう内容です」「必要な方は詳細をご確認ください」と、判断材料を渡します。\n限定や残数を使う場合は、実際の条件に基づく情報だけを記載します。'
+                                }
+                            ],
+                            template: {
+                                title: '信頼構築テンプレ (P.49参照)',
+                                code: `役立つ情報:\n共感:\n事例:\n人柄:\n商品紹介:`
+                            },
+                            caseStudy: {
+                                ng: '「月〜金まで毎日サービス募集中・残り◯名・今すぐ問い合わせ」',
+                                improve: '「ノウハウ→失敗談→チェックリスト→商品案内の用に、価値提供と案内を混ぜる」',
+                                point: '販売投稿だけにせず、信頼を作る投稿を間に置きます。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 09に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '商品紹介だけに偏っていない',
+                                '読者の悩みを言語化している',
+                                '実体験や考え方が入っている',
+                                '実績は事実に基づく',
+                                '過度な煽りを使っていない'
+                            ]
+                        },
+                        {
+                            id: 10,
+                            title: 'SNSから商品・サービスにつなげる導線設計',
+                            goal: '投稿からプロフィール・固定投稿・詳細確認へ自然につながる流れを作る。',
+                            question: '投稿を読んだ人は、次にどこへ進めばよいか分かりますか?',
+                            contents: [
+                                {
+                                    heading: '導線は「次にどこへ進むか」',
+                                    page: 'P.54参照',
+                                    text: '投稿を読んだ人が興味を持っても、次に何をすればいいか分からなければ離脱しやすくなります。投稿→プロフィール→固定投稿・詳細→問い合わせ・購入という流れを作ります。\nすべての投稿から購入へ直接誘導する必要はありません。プロフィール閲覧や固定投稿確認も立派な次の行動です。'
+                                },
+                                {
+                                    heading: '最終行動を先に決める',
+                                    page: 'P.55参照',
+                                    text: '導線は入口から考えるより、最終的に取ってほしい行動から逆算すると作りやすくなります。問い合わせなのか、詳細確認なのか、店舗来店なのかを最初に決めます。\n・最終行動を決める → プロフィールを整える → 固定投稿・案内投稿を作る → 投稿から自然に誘導する'
+                                },
+                                {
+                                    heading: '固定投稿の基本構成',
+                                    page: 'P.56参照',
+                                    text: '固定投稿には、自己紹介・誰向けか・発信内容・商品やサービス・次に見る場所をまとめます。初めて来た人向けの案内ページと考えると整理しやすくなります。\n外部リンクや連絡手段を使う場合は、利用しているSNSの最新ルールに沿って設定してください。'
+                                }
+                            ],
+                            template: {
+                                title: '導線設計テンプレ (P.54参照)',
+                                code: `入口となる投稿:\n投稿で伝えること:\n次に見てほしい場所:\nそこで伝えること:\n最終行動:`
+                            },
+                            caseStudy: {
+                                ng: '「今すぐ商品を買ってください。」',
+                                improve: '「SNS 発信を最初から整理したい方は、プロフィールに初心者向け案内をまとめています。」',
+                                point: '投稿ごとに、無理のない次の行動を1つ示します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 10に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '投稿後の次の行動を決めた',
+                                'プロフィールが整っている',
+                                '固定投稿がある',
+                                '商品・サービスの案内が分かる',
+                                '誘導先と投稿内容がつながっている'
+                            ]
+                        },
+                        {
+                            id: 11,
+                            title: '継続できるSNS運用ルール',
+                            goal: 'やる気ではなく、作業分解と時間管理で継続できる運用を作る。',
+                            question: '「SNSを見る時間」と「SNSを作る時間」を分けていますか?',
+                            contents: [
+                                {
+                                    heading: 'SNS作業を4つに分ける',
+                                    page: 'P.59参照',
+                                    text: '継続のコツは、毎日すべてをやることではなく、ネタ出し・投稿作成・投稿・分析を分けることです。まとめてできる作業はまとめます。\n・ネタ出し\n・投稿作成\n・投稿\n・分析'
+                                },
+                                {
+                                    heading: '週3投稿モデル',
+                                    page: 'P.60参照',
+                                    text: '月・水・金に投稿し、日曜にまとめてネタ作りと分析をするなど、自分の仕事に合わせた運用日を決めます。毎日投稿は必須ではありません。\n忙しい週でも続けられる最低ラインを決めておくと、運用がゼロになりにくくなります。'
+                                },
+                                {
+                                    heading: '30分運用モデル',
+                                    page: 'P.61参照',
+                                    text: '5分で反応確認、10分で投稿作成、10分でコメント・交流、5分でメモというように時間を区切ります。「何となく見る時間」を減らすことがポイントです。\n通知を常に確認する必要はありません。対応時間を決め、仕事や休息の時間と分けます。'
+                                }
+                            ],
+                            template: {
+                                title: '運用ルールテンプレ (P.59参照)',
+                                code: `投稿頻度: 週＿回\n投稿曜日:\nネタ出しの日:\n分析の日:\n1日に使う時間: ＿分\nSNSを見ない時間帯:`
+                            },
+                            caseStudy: {
+                                ng: '「毎日必ず投稿し、空いた時間は全部SNSを見る」',
+                                improve: '「週3投稿・日曜にまとめてネタ出し・1日30分まで」',
+                                point: '継続できる作業量と時間制限を先に決めます。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 11に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '継続できる投稿頻度を決めた',
+                                'ネタ出し日を決めた',
+                                '分析日を決めた',
+                                'SNSを見る時間を決めた',
+                                '投稿ストックを作っている'
+                            ]
+                        },
+                        {
+                            id: 12,
+                            title: '数字を見て改善する',
+                            goal: '閲覧・反応・プロフィール閲覧・行動を順番に確認して改善する。',
+                            question: '「伸びた・伸びない」を感覚だけで判断していませんか?',
+                            contents: [
+                                {
+                                    heading: '初心者が見る4段階の数字',
+                                    page: 'P.64参照',
+                                    text: '最初からすべての数字を追う必要はありません。見られたか、反応されたか、プロフィールを見られたか、次の行動につながったかの順で見ます。\n・表示・閲覧\n・反応(いいね・保存・コメント等)\n・プロフィール閲覧・フォロー\n・問い合わせ・購入などの行動'
+                                },
+                                {
+                                    heading: '数字は原因診断に使う',
+                                    page: 'P.65参照',
+                                    text: '見られないならテーマや冒頭、見られるが反応が少ないなら内容、プロフィールに来ないなら誘導、プロフィールを見られるがフォローされないならプロフィールを見直します。\nSNSごとに表示される指標名や計測方法は異なるため、同じ数字として単純比較せず、そのSNS内の過去投稿と比べます。'
+                                },
+                                {
+                                    heading: '1投稿ではなく複数投稿で見る',
+                                    page: 'P.66参照',
+                                    text: '1回の投稿だけで「このテーマはダメ」と決めないようにします。数投稿分を比較し、自分の過去投稿との差を見る方が改善につながります。\n分析では「良かった・悪かった」だけでなく、「次回何を1つ変えるか」まで書きます。'
+                                }
+                            ],
+                            template: {
+                                title: '週次分析テンプレ (P.64参照)',
+                                code: `今週最も反応が良かった投稿:\n理由として考えられること:\n最も反応が低かった投稿:\n改善できる点:\n来週試すこと:`
+                            },
+                            caseStudy: {
+                                ng: '「伸びなかった→自分にはSNSが向いていない。」',
+                                improve: '「保存は多いがプロフィール閲覧が少ない。次回は最後にプロフィールへの自然な案内を追加する。」',
+                                point: '感想ではなく、数字→仮説→次の1手に変換します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 12に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '週1回数字を確認する',
+                                '1投稿だけで判断しない',
+                                'フォロワー数だけ見ない',
+                                'テーマごとに比較する',
+                                '次回試すことを1つ決める'
+                            ]
+                        },
+                        {
+                            id: 13,
+                            title: '伸びないときの原因診断',
+                            goal: '症状から原因を切り分け、直す場所を1つに絞る。',
+                            question: '伸びないとき、投稿数を増やす前に原因を診断していますか?',
+                            contents: [
+                                {
+                                    heading: '症状から直す場所を決める',
+                                    page: 'P.69参照',
+                                    text: '伸びないときに「もっと投稿する」だけでは、原因が残ったまま作業量だけ増えることがあります。症状を見て、どこで止まっているかを切り分けます。\nまず「見られない」「反応がない」「フォローされない」「問い合わせにつながらない」「継続できない」のどれに近いかを選びます。'
+                                },
+                                {
+                                    heading: '症状別の確認ポイント',
+                                    page: 'P.70参照',
+                                    text: '症状ごとに確認する場所を変えます。一度に全部を直すより、最も可能性の高い場所から試します。\n・見られない → テーマ・冒頭\n・見られるが反応が少ない → 具体性・内容\n・反応はあるがフォローされない → プロフィール\n・フォローされるが問い合わせがない → 信頼・商品・導線\n・投稿が続かない → 頻度・作業時間・ストック'
+                                },
+                                {
+                                    heading: '改善は1回に1テーマ',
+                                    page: 'P.71参照',
+                                    text: '一度にプロフィール、投稿頻度、デザイン、テーマ、商品紹介を全部変えると、何が効いたか分かりにくくなります。今月の改善テーマを1つ決めて検証します。\n変更前の状態と変更内容をメモしておくと、翌月の判断材料になります。'
+                                }
+                            ],
+                            template: {
+                                title: '改善テーマテンプレ (P.69参照)',
+                                code: `症状:\n原因候補1:\n原因候補2:\n今月直す場所:\n変更内容:\n確認日:`
+                            },
+                            caseStudy: {
+                                ng: '「伸びないので投稿数を倍にする」',
+                                improve: '「見られているがフォローされないため、今月はプロフィールの対象者・発信内容・次の行動を見直す」',
+                                point: '症状に合った場所だけを改善します。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 13 に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                '症状を言葉にできる',
+                                '原因候補を3つ以内に絞った',
+                                '今月直す場所を1つ決めた',
+                                '変更前の状態を記録した',
+                                '数投稿・一定期間で確認する'
+                            ]
+                        },
+                        {
+                            id: 14,
+                            title: '30日SNS運用ロードマップ',
+                            goal: '設計・投稿・導線・改善を30日で一巡させる。',
+                            question: '30日後に「何ができている状態」なら前進したと言えますか?',
+                            contents: [
+                                {
+                                    heading: 'Week1:設計',
+                                    page: 'P.74参照',
+                                    text: 'Day1〜7は、SNSの目的・ターゲット・悩み・発信テーマ・中心SNS・アカウント名・プロフィールを整えます。最初の週は投稿数より土台を優先します。\n・Day1: 目的\n・Day2: ターゲット\n・Day3: 悩み10個\n・Day4: 3本柱\n・Day5: 中心 SNS\n・Day6: 名前・肩書き\n・Day7: プロフィール'
+                                },
+                                {
+                                    heading: 'Week2:投稿',
+                                    page: 'P.75参照',
+                                    text: 'Day8〜14 は投稿ネタを30案まで増やし、共感・ノウハウ・チェックリストなど複数の型で実際に投稿します。\n・Day8〜10: 投稿ネタ 30案\n・Day11: 共感投稿\n・Day12: ノウハウ投稿\n・Day13: チェックリスト投稿\n・Day14: 振り返り'
+                                },
+                                {
+                                    heading: 'Week3:導線',
+                                    page: 'P.76参照',
+                                    text: 'Day15〜21 は固定投稿、商品・サービスとのつながり、プロフィールの次の行動を見直します。販売投稿も1つ作り、過度な売り込みになっていないか確認します。\n・Day15: 固定投稿\n・Day16: 商品との接続\n・Day17: プロフィール CTA\n・Day18: Q&A\n・Day19: 失敗談\n・Day20: 商品紹介\n・Day21: 週次確認'
+                                },
+                                {
+                                    heading: 'Week4: 分析と改善',
+                                    page: 'P.77参照',
+                                    text: 'Day22〜30は反応が良い投稿・低い投稿・プロフィール・固定投稿を確認し、次月の改善テーマを1つ決めます。30日で完成ではなく、改善サイクルを作ることが目的です。\n・Day22〜24: 投稿分析\n・Day25: プロフィール再確認\n・Day26: 固定投稿再確認\n・Day27: ネタ追加\n・Day28: 次月計画\n・Day29: 全体診断\n・Day30: 改善テーマ決定'
+                                }
+                            ],
+                            template: {
+                                title: '30日ゴールテンプレ (P.74参照)',
+                                code: `30日後にできていたいこと:\nWeek1 のゴール:\nWeek2 のゴール:\nWeek3 のゴール:\nWeek4 のゴール:\n2か月目の改善テーマ:`
+                            },
+                            caseStudy: {
+                                ng: '「30日で絶対にフォロワー1万人」',
+                                improve: '「30日でターゲット・3本柱・プロフィール・30投稿ネタ・固定投稿・週次分析の型を作る」',
+                                point: '成果保証ではなく、自分で管理できる状態をゴールにします。'
+                            },
+                            worksheetNotice: '別冊「SNS運用実践ワークブック」でChapter 14に対応する WORKを記入し、今日やることを1つだけ決めてください。',
+                            checklist: [
+                                'SNSの目的を決めた',
+                                'ターゲットを決めた',
+                                '発信テーマを3本作った',
+                                'プロフィールを完成させた',
+                                '投稿ネタを30個以上作った',
+                                '固定投稿を作った',
+                                '数字を確認した',
+                                '次月の改善点を1つ決めた'
+                            ]
+                        }
+                    ],
+
+                    // 30-Day Roadmap Exact Items Data (P.74-77)
+                    roadmapData: [
+                        {
+                            week: 1,
+                            title: '設計',
+                            items: [
+                                { id: 'w1_d1', dayLabel: 'Day1', task: '目的' },
+                                { id: 'w1_d2', dayLabel: 'Day2', task: 'ターゲット' },
+                                { id: 'w1_d3', dayLabel: 'Day3', task: '悩み10個' },
+                                { id: 'w1_d4', dayLabel: 'Day4', task: '3本柱' },
+                                { id: 'w1_d5', dayLabel: 'Day5', task: '中心SNS' },
+                                { id: 'w1_d6', dayLabel: 'Day6', task: '名前・肩書き' },
+                                { id: 'w1_d7', dayLabel: 'Day7', task: 'プロフィール' }
+                            ]
+                        },
+                        {
+                            week: 2,
+                            title: '投稿',
+                            items: [
+                                { id: 'w2_d8_10', dayLabel: 'Day8〜10', task: '投稿ネタ30案' },
+                                { id: 'w2_d11', dayLabel: 'Day11', task: '共感投稿' },
+                                { id: 'w2_d12', dayLabel: 'Day12', task: 'ノウハウ投稿' },
+                                { id: 'w2_d13', dayLabel: 'Day13', task: 'チェックリスト投稿' },
+                                { id: 'w2_d14', dayLabel: 'Day14', task: '振り返り' }
+                            ]
+                        },
+                        {
+                            week: 3,
+                            title: '導線',
+                            items: [
+                                { id: 'w3_d15', dayLabel: 'Day15', task: '固定投稿' },
+                                { id: 'w3_d16', dayLabel: 'Day16', task: '商品との接続' },
+                                { id: 'w3_d17', dayLabel: 'Day17', task: 'プロフィールCTA' },
+                                { id: 'w3_d18', dayLabel: 'Day18', task: 'Q&A' },
+                                { id: 'w3_d19', dayLabel: 'Day19', task: '失敗談' },
+                                { id: 'w3_d20', dayLabel: 'Day20', task: '商品紹介' },
+                                { id: 'w3_d21', dayLabel: 'Day21', task: '週次確認' }
+                            ]
+                        },
+                        {
+                            week: 4,
+                            title: '分析と改善',
+                            items: [
+                                { id: 'w4_d22_24', dayLabel: 'Day22〜24', task: '投稿分析' },
+                                { id: 'w4_d25', dayLabel: 'Day25', task: 'プロフィール再確認' },
+                                { id: 'w4_d26', dayLabel: 'Day26', task: '固定投稿再確認' },
+                                { id: 'w4_d27', dayLabel: 'Day27', task: 'ネタ追加' },
+                                { id: 'w4_d28', dayLabel: 'Day28', task: '次月計画' },
+                                { id: 'w4_d29', dayLabel: 'Day29', task: '全体診断' },
+                                { id: 'w4_d30', dayLabel: 'Day30', task: '改善テーマ決定' }
+                            ]
+                        }
+                    ],
+
+                    // Static Template texts for Review Screen (P.80-81)
+                    weeklyAnalysisTemplateText: `今週最も反応が良かった投稿:\n理由として考えられること:\n最も反応が低かった投稿:\n改善できる点:\n来週試すこと:`,
+                    improvementThemeTemplateText: `症状:\n原因候補1:\n原因候補2:\n今月直す場所:\n変更内容:\n確認日:`,
+
+                    // Day 30 Completion Checklist (P.78)
+                    day30CompletionChecklist: [
+                        'SNSの目的を決めた',
+                        'ターゲットを決めた',
+                        '発信テーマを3本作った',
+                        'プロフィールを完成させた',
+                        '投稿ネタを30個以上作った',
+                        '固定投稿を作った',
+                        '数字を確認した',
+                        '次月の改善点を1つ決めた'
+                    ],
+
+                    // Final Checklist (P.83)
+                    finalChecklist: {
+                        account: {
+                            title: 'アカウント',
+                            items: [
+                                '誰向けか明確',
+                                '発信テーマが明確',
+                                'プロフィールが分かりやすい',
+                                '商品・サービスとのつながりがある'
+                            ]
+                        },
+                        post: {
+                            title: '投稿',
+                            items: [
+                                '1投稿1テーマ',
+                                '読者の悩みがある',
+                                '結論がある',
+                                '具体例がある',
+                                '次の行動がある'
+                            ]
+                        },
+                        operation: {
+                            title: '運用',
+                            items: [
+                                '継続できる頻度',
+                                '投稿ストックがある',
+                                '分析日を決めている',
+                                '改善内容を記録している'
+                            ]
+                        },
+                        trust: {
+                            title: '信頼・安全',
+                            items: [
+                                '商品紹介だけではない',
+                                '実績は事実に基づいている',
+                                '成果保証をしていない',
+                                '各SNSの最新ルールを確認する'
+                            ]
+                        }
+                    }
+                };
+            },
+
+            computed: {
+                currentChapter() {
+                    return this.chapters.find(c => c.id === this.selectedChapterId) || this.chapters[0];
+                },
+
+                currentChapterRecord() {
+                    return this.getChapterRecord(this.selectedChapterId);
+                },
+
+                currentChapterCheckedCount() {
+                    const rec = this.currentChapterRecord;
+                    if (!rec || !rec.checklist) return 0;
+                    return rec.checklist.filter(Boolean).length;
+                },
+
+                completedChaptersCount() {
+                    let count = 0;
+                    for (let id = 1; id <= 14; id++) {
+                        if (this.getChapterRecord(id).read) count++;
+                    }
+                    return count;
+                },
+
+                completedWorksheetChaptersCount() {
+                    let count = 0;
+                    for (let id = 1; id <= 14; id++) {
+                        if (this.getChapterRecord(id).worksheetStatus === 'completed') count++;
+                    }
+                    return count;
+                },
+
+                chapterCheckProgress() {
+                    let total = 0;
+                    let checked = 0;
+                    this.chapters.forEach(ch => {
+                        const rec = this.getChapterRecord(ch.id);
+                        total += ch.checklist.length;
+                        if (rec && rec.checklist) {
+                            checked += rec.checklist.filter(Boolean).length;
+                        }
+                    });
+                    const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+                    return { checked, total, percentage };
+                },
+
+                roadmapProgress() {
+                    let total = 0;
+                    let completed = 0;
+                    this.roadmapData.forEach(w => {
+                        w.items.forEach(item => {
+                            total++;
+                            const rec = this.getRoadmapRecord(item.id);
+                            if (rec && rec.status === 'completed') completed++;
+                        });
+                    });
+                    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { completed, total, percentage };
+                }
+            },
+
+            created() {
+                this.loadSavedData();
+            },
+
+            methods: {
+                // Initialize user records with default fallback
+                getChapterRecord(id) {
+                    if (!this.chapterRecords[id]) {
+                        const ch = this.chapters.find(c => c.id === id);
+                        const listLength = ch ? ch.checklist.length : 5;
+                        this.chapterRecords[id] = {
+                            read: false,
+                            readDate: '',
+                            worksheetStatus: 'unstarted',
+                            worksheetRef: '',
+                            worksheetCompletedDate: '',
+                            todayAction: '',
+                            checklist: new Array(listLength).fill(false)
+                        };
+                    }
+                    return this.chapterRecords[id];
+                },
+
+                getRoadmapRecord(itemId) {
+                    if (!this.roadmapRecords[itemId]) {
+                        this.roadmapRecords[itemId] = {
+                            status: 'unstarted',
+                            date: ''
+                        };
+                    }
+                    return this.roadmapRecords[itemId];
+                },
+
+                isContentOpen(chId, contentIdx) {
+                    const key = `${chId}_${contentIdx}`;
+                    // Default: open first accordion by default, others collapsed
+                    if (this.accordionState[key] === undefined) {
+                        return contentIdx === 0;
+                    }
+                    return this.accordionState[key];
+                },
+
+                toggleContentAccordion(chId, contentIdx) {
+                    const key = `${chId}_${contentIdx}`;
+                    const current = this.isContentOpen(chId, contentIdx);
+                    this.accordionState[key] = !current;
+                },
+
+                navigateToChapter(id) {
+                    if (id < 1 || id > 14) return;
+                    this.selectedChapterId = id;
+                    this.lastOpenedChapterId = id;
+                    this.currentTab = 'chapters';
+                    this.saveData();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                onSelectChapter() {
+                    this.lastOpenedChapterId = this.selectedChapterId;
+                    this.saveData();
+                },
+
+                isChapterCheckmarked(chId, idx) {
+                    const rec = this.getChapterRecord(chId);
+                    return !!rec.checklist[idx];
+                },
+
+                toggleChapterCheckmark(chId, idx) {
+                    const rec = this.getChapterRecord(chId);
+                    rec.checklist[idx] = !rec.checklist[idx];
+                    this.saveData();
+                },
+
+                getWeekCompletedCount(weekNum) {
+                    const week = this.roadmapData.find(w => w.week === weekNum);
+                    if (!week) return 0;
+                    return week.items.filter(i => this.getRoadmapRecord(i.id).status === 'completed').length;
+                },
+
+                getWorksheetBadgeClass(status) {
+                    if (status === 'completed') return 'bg-emerald-100 text-emerald-800';
+                    if (status === 'in_progress') return 'bg-amber-100 text-amber-800';
+                    return 'bg-slate-100 text-slate-600';
+                },
+
+                getWorksheetStatusText(status) {
+                    if (status === 'completed') return '記入済み';
+                    if (status === 'in_progress') return '記入中';
+                    return '未着手';
+                },
+
+                saveTodayAction() {
+                    if (this.currentChapterRecord) {
+                        this.currentChapterRecord.todayAction = this.todayAction;
+                    }
+                    this.saveData();
+                    this.showToast('「今日やること1つ」を保存しました');
+                },
+
+                isDay30Checked(idx) {
+                    return !!this.day30ChecklistRecords[idx];
+                },
+
+                toggleDay30Check(idx) {
+                    this.day30ChecklistRecords[idx] = !this.day30ChecklistRecords[idx];
+                    this.saveData();
+                },
+
+                isFinalCheckmarked(catKey, idx) {
+                    if (!this.finalChecklistRecords[catKey]) {
+                        this.finalChecklistRecords[catKey] = [];
+                    }
+                    return !!this.finalChecklistRecords[catKey][idx];
+                },
+
+                toggleFinalCheckmark(catKey, idx) {
+                    if (!this.finalChecklistRecords[catKey]) {
+                        this.finalChecklistRecords[catKey] = [];
+                    }
+                    this.finalChecklistRecords[catKey][idx] = !this.finalChecklistRecords[catKey][idx];
+                    this.saveData();
+                },
+
+                addReviewHistory() {
+                    if (!this.newReview.targetPeriod) {
+                        alert('「対象の週または月」を入力してください。');
+                        return;
+                    }
+                    this.reviewHistory.push({ ...this.newReview });
+                    this.newReview = {
+                        targetPeriod: '',
+                        worksheetStatus: 'unstarted',
+                        completedDate: '',
+                        confirmedDate: ''
+                    };
+                    this.saveData();
+                    this.showToast('振り返り記録を追加しました');
+                },
+
+                deleteReviewHistory(index) {
+                    if (confirm('この振り返り記録を削除しますか？')) {
+                        this.reviewHistory.splice(index, 1);
+                        this.saveData();
+                        this.showToast('振り返り記録を削除しました');
+                    }
+                },
+
+                copyToClipboard(text) {
+                    if (!text) return;
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        this.showToast('テンプレートをクリップボードにコピーしました');
+                    } catch (err) {
+                        console.error('コピー失敗:', err);
+                    }
+                    document.body.removeChild(textarea);
+                },
+
+                showToast(msg) {
+                    this.toastMessage = msg;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 2500);
+                },
+
+                // Storage and Data Management
+                saveData() {
+                    const payload = {
+                        version: '1.0',
+                        lastOpenedChapterId: this.lastOpenedChapterId,
+                        todayAction: this.todayAction,
+                        chapterRecords: this.chapterRecords,
+                        roadmapRecords: this.roadmapRecords,
+                        reviewHistory: this.reviewHistory,
+                        day30ChecklistRecords: this.day30ChecklistRecords,
+                        finalChecklistRecords: this.finalChecklistRecords
+                    };
+                    localStorage.setItem('sns_guide_tracker_data', JSON.stringify(payload));
+                },
+
+                loadSavedData() {
+                    try {
+                        const raw = localStorage.getItem('sns_guide_tracker_data');
+                        if (!raw) {
+                            // First time init defaults
+                            this.initDefaultRecords();
+                            return;
+                        }
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed === 'object') {
+                            this.lastOpenedChapterId = parsed.lastOpenedChapterId || 1;
+                            this.selectedChapterId = this.lastOpenedChapterId;
+                            this.todayAction = parsed.todayAction || '';
+                            this.chapterRecords = parsed.chapterRecords || {};
+                            this.roadmapRecords = parsed.roadmapRecords || {};
+                            this.reviewHistory = parsed.reviewHistory || [];
+                            this.day30ChecklistRecords = parsed.day30ChecklistRecords || [];
+                            this.finalChecklistRecords = parsed.finalChecklistRecords || {};
+
+                            // Ensure structure for all 14 chapters
+                            this.chapters.forEach(ch => this.getChapterRecord(ch.id));
+                        }
+                    } catch (e) {
+                        console.error('Failed to load localStorage data', e);
+                        this.initDefaultRecords();
+                    }
+                },
+
+                initDefaultRecords() {
+                    this.chapterRecords = {};
+                    this.roadmapRecords = {};
+                    this.reviewHistory = [];
+                    this.day30ChecklistRecords = new Array(8).fill(false);
+                    this.finalChecklistRecords = {
+                        account: [false, false, false, false],
+                        post: [false, false, false, false, false],
+                        operation: [false, false, false, false],
+                        trust: [false, false, false, false]
+                    };
+                    this.chapters.forEach(ch => this.getChapterRecord(ch.id));
+                },
+
+                exportData() {
+                    const payload = {
+                        appName: 'SNS運用完全ガイド 進捗記録データ',
+                        exportedAt: new Date().toISOString(),
+                        version: '1.0',
+                        lastOpenedChapterId: this.lastOpenedChapterId,
+                        todayAction: this.todayAction,
+                        chapterRecords: this.chapterRecords,
+                        roadmapRecords: this.roadmapRecords,
+                        reviewHistory: this.reviewHistory,
+                        day30ChecklistRecords: this.day30ChecklistRecords,
+                        finalChecklistRecords: this.finalChecklistRecords
+                    };
+
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+                    const downloadAnchor = document.createElement('a');
+                    downloadAnchor.setAttribute("href", dataStr);
+                    downloadAnchor.setAttribute("download", `SNS運用完全ガイド_進捗記録_${new Date().toISOString().slice(0,10)}.json`);
+                    document.body.appendChild(downloadAnchor);
+                    downloadAnchor.click();
+                    downloadAnchor.remove();
+                    this.showToast('データをファイルへ書き出しました');
+                },
+
+                importData(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            
+                            // Validate data structure
+                            if (!imported || typeof imported !== 'object' || !imported.chapterRecords) {
+                                alert('不正なデータ形式です。既存の記録を上書きできません。正しいJSONファイルを選択してください。');
+                                return;
+                            }
+
+                            if (confirm('記録データを読み込んで既存のデータを置き換えますか？この操作は取り消せません。')) {
+                                this.lastOpenedChapterId = imported.lastOpenedChapterId || 1;
+                                this.selectedChapterId = this.lastOpenedChapterId;
+                                this.todayAction = imported.todayAction || '';
+                                this.chapterRecords = imported.chapterRecords || {};
+                                this.roadmapRecords = imported.roadmapRecords || {};
+                                this.reviewHistory = imported.reviewHistory || [];
+                                this.day30ChecklistRecords = imported.day30ChecklistRecords || [];
+                                this.finalChecklistRecords = imported.finalChecklistRecords || {};
+
+                                this.saveData();
+                                this.openBackupModal = false;
+                                this.showToast('記録データを正常に読み込みました');
+                            }
+                        } catch (err) {
+                            alert('JSONファイルの解析に失敗しました。ファイルの内容をご確認ください。');
+                            console.error(err);
+                        }
+                    };
+                    reader.readAsText(file);
+                },
+
+                confirmResetData() {
+                    if (confirm('【警告】本当に全記録を初期化しますか？消去されたデータは復元できません。')) {
+                        if (confirm('最終確認です。すべての学習・実践進捗をクリアして初期化します。よろしいですか？')) {
+                            localStorage.removeItem('sns_guide_tracker_data');
+                            this.initDefaultRecords();
+                            this.lastOpenedChapterId = 1;
+                            this.selectedChapterId = 1;
+                            this.todayAction = '';
+                            this.openBackupModal = false;
+                            this.showToast('すべての記録を初期化しました');
+                        }
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
